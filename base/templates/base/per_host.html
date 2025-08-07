@@ -1,0 +1,82 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<div class="class-container">
+
+  <!-- SUMMARY CARDS -->
+  <div class="incident-count">
+    {% if events %}
+    <div class="incidents">Host : {{ events.0.name }}</div>
+    <div class="incidents">Total Incidents <br>{{ events|length }}</div>
+    {% else %}
+    <div class="incidents">No Incident Data Found</div>
+    {% endif %}
+  </div>
+
+  <!-- MAIN CONTENT AREA -->
+  <div class="per-host-main-content" id="perHostData" data-pk="{{ pk }}">
+
+    <!-- ROW 1: SCROLLABLE TABLE SECTION -->
+    <div class="content-row table-row scrollable-table">
+      {% if events %}
+      <h2>Downtime Events for {{ events.0.name }}</h2>
+      {% else %}
+      <h2>Downtime Events</h2>
+      {% endif %}
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Host</th>
+              <th>Down Time</th>
+              <th>Up Time</th>
+              <th>Duration</th>
+              <th>Reason</th>
+              <th>Type</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for event in events %}
+            <tr>
+              <td>{{ event.date }}</td>
+              <td>{{ event.name }}</td>
+              <td>{{ event.down_time }}</td>
+              <td>{{ event.up_time }}</td>
+              <td>{{ event.duration }}</td>
+              <td>{{ event.reason }}</td>
+              <td>{{ event.type }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  <!-- ROW 2: CHARTS -->
+<div class="content-row charts-row" id="perHostCharts" data-pk="{{ pk }}">
+  <div class="chart-summary">
+    <h2>Uptime vs. Downtime</h2>
+    <p class="chart-description">Total time in minutes for the period.</p>
+    <div class="chart-container">
+      <canvas id="uptimePieChart"></canvas>
+    </div>
+  </div>
+  <div class="chart-summary">
+    <h2>Daily Downtime</h2>
+    <p class="chart-description">Total downtime in minutes per day.</p>
+    <div class="chart-container">
+      <canvas id="dailyBarChart"></canvas>
+    </div>
+  </div>
+  <div class="chart-summary">
+    <h2>Daily Outage Frequency</h2>
+    <p class="chart-description">Number of outages per day.</p>
+    <div class="chart-container">
+      <canvas id="trendLineChart"></canvas>
+    </div>
+  </div>
+</div>
+ </div>
+</div>
+{% endblock %}
+

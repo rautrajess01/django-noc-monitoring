@@ -1,0 +1,178 @@
+{% extends 'layout.html' %}
+{% block body %}
+<div class="class-container">
+
+  <!-- INCIDENT COUNTS (No changes here) -->
+  <div class="incident-count">
+  <div class="incidents"><a href="{% url 'monthview' %}">Total {{type_query_cap}} <br><h3>{{ total_events }}</h3></a></div>
+    
+    {% if type_query == 'switch' or type_query == '' or not type_query%}
+      <div class="incidents">Total Unique Switch <br><h3>{{ total_switch }}</h3></div>
+    {% endif %}
+    {% if type_query == 'mpls' or type_query == '' or not type_query%}
+      <div class="incidents">Total Unique MPLS <br><h3>{{ total_mpls }}</h3></div>
+    {% endif %}
+  </div>
+
+  <!-- CHECK FOR THE MAIN VIEW (SWITCH/MPLS/ALL) -->
+  {% if type_query == 'mpls' or type_query == 'switch' or type_query == '' or not type_query %}
+  
+  <!-- ROW 1: CHARTS SIDE-BY-SIDE (No changes here) -->
+  <div class="charts-row">
+
+    <!-- UPTIME PIE CHART -->
+    <div class="chart-container">
+      <h2>Average Uptime by Device Type</h2>
+      <p class="chart-description">
+        Compares the average uptime of all Switches vs. all MPLS devices.
+      </p>
+      <canvas id="aggregateUptimeChart"></canvas>
+    </div>
+
+    <!-- NEW UPTIME TREND CHART -->
+  
+    <div class="chart-container">
+   <h2>{% if not type_query or type_query == ''%}Daily Incident Trend {% else %}  Daily Incident Trend({{type_query_cap}}) {% endif %}</h2>
+      <p class="chart-description">
+        Shows the daily count of incidents for the period.
+      </p>
+      <canvas id="dailyTrendChart"></canvas>
+    </div>
+
+  </div>
+
+  <!-- 
+    CHANGE: The two tables below are now stacked vertically instead of being side-by-side.
+    This gives each table the full width, preventing them from being cramped.
+  -->
+
+  <!-- HOST SUMMARY TABLE (Now takes full width) -->
+  <div class="table-container" style="margin-top: 40px;"> <!-- Added margin-top for spacing from charts -->
+    <h2 id='host-sum'>Host Summary</h2>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Host Name</th>
+            <th>Count</th>
+            <th>Total Duration</th>
+            <th>Reason</th>
+            <th>Uptime</th>
+          </tr>
+        </thead>
+        <tbody id="hostSummaryTable">
+          {% for host in host_details %}
+          <tr class="host-row {% if forloop.counter > 10 %}hidden-row{% endif %}">
+            <td><a href="{% url 'host-details' pk=host.encoded_name %}">{{ host.name }}</a></td>
+            <td>{{ host.count }}</td>
+            <td> 
+           {% if not host.up_time and host.down_time %}
+    <span class="live-duration" data-down-time="{{ host.down_time|date:'c' }}"></span>
+{% elif host.duration %}
+    {{ host.duration }}
+{% else %}
+    {# Optional: a fallback for a host that is down but has no time recorded #}
+    <span>Down</span>
+{% endif %}</td>
+            <td>{{ host.reason }}</td>
+            <td>{{ host.uptime }}%</td>
+          </tr>
+          {% endfor %}
+        </tbody> 
+      </table>
+      <button id="showMoreBtn">Show More</button>
+    </div>
+  </div>
+
+
+
+  <!-- ELSE BLOCK FOR OTHER EVENT TYPES (No changes here) -->
+  {% else %}
+  <div class="table-container" style="margin-top: 30px;">
+    <h2 id='host-sum'>{{type_query_cap}} Summary</h2>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Host/Link</th>
+            <th>Down Time</th>
+            <th>Up Time</th>
+            <th>Total Duration</th>
+            <th>Reason</th>
+          </tr>
+        </thead>
+        <tbody id="hostSummaryTable">
+        {% for host in other_events %}
+        <tr class="host-row {% if forloop.counter > 10 %}hidden-row{% endif %}">
+          <td>{{host.date}}</td>
+          <td>{{ host.name }}</td>
+          <td>{{ host.downtime }}</td>
+          <td>{{host.uptime}}</td>
+          <td>{{ host.duration }}</td>
+          <td>{{ host.reason }}</td>
+        </tr>
+        {% endfor %}
+        </tbody> 
+      </table>
+      <button id="showMoreBtn">Show More</button>
+    </div>
+  </div>
+  {% endif %}
+  <!-- PENDING ISSUES TABLE (Now stacked below Host Summary) -->
+  <div id="pending-issues-container" class="table-container" style="margin-top: 40px;"> <!-- Added margin-top for spacing -->
+ <h2 style="text-align: center;">Pending{% if not type_query == '' %} {{type_query_cap}} {% endif %} Issues : {{pendings|length}}</h2>
+    <div class="table-wrapper">
+      {% if pendings %}
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Host/Link</th>
+              <th>Down Time</th>
+              <th>Duration</th>
+              <th>Reason</th>
+              <th>Type</th>
+              <th>Remarks</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for pending in pendings %}
+            <tr>
+              <td>{{ pending.date }}</td>
+              <td>{{ pending.name }}</td>
+              <td>{{ pending.down_time }}</td>
+              <td>{% if not pending.up_time and pending.down_time %}
+                <span class="live-duration" data-down-time="{{ pending.down_time|date:'c' }}"></span>
+              {% elif pending.duration %}
+                {{ pending.duration }}
+              {% else %}
+                <span>0</span>
+              {% endif %}</td>
+              <td>{{ pending.reason }}</td>
+              <td>{{ pending.type }}</td>
+              <td>
+                <button type="button" onclick="openPopup('popup-{{ forloop.counter }}')">Show</button>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+         {% for pending in pendings %}
+      <div id="popup-{{ forloop.counter }}" class="popup-overlay">
+        <div class="popup">
+          <button class="close-btn" onclick="closePopup('popup-{{ forloop.counter }}')">×</button>
+          <h3>Remark</h3>
+          <p>{{ pending.remarks }}</p>
+        </div>
+      </div>
+      {% endfor %}
+      {% else %}
+        <p style="text-align: center; margin-top: 30px; color: #666;">No pending issues found.</p>
+      {% endif %}
+    </div>
+  </div>
+
+
+</div>
+{% endblock body %}

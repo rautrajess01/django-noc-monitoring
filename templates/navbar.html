@@ -1,0 +1,99 @@
+<div class="container navbar-container">
+  <div class="back-button">
+    <a href="{% url 'index' %}?type=" title="Back">
+      <button type="button" aria-label="Go back">&#8592;</button>
+    </a>
+  </div>
+
+  <div class="filter-wrapper">
+    {% if page == 'index.html' %}
+      <form class="filter-form" method="GET" action="{% url 'index' %}">
+    {% else %}
+      <form class="filter-form" method="GET" action="{{ request.path }}">
+    {% endif %}
+
+      <input
+        type="text"
+        name="name"
+        id="name"
+        value="{{ request.GET.name }}"
+        placeholder="Search.."
+        aria-label="Search by Name"
+      />
+      {% if request.resolver_match.url_name == "monthview" and request.GET.month %}
+    <input type="hidden" name="month" value="{{ request.GET.month }}">
+  {% endif %}
+    {% if page == 'per_host.html' %}
+      <div class="date-group">
+        <label for="start_date">From:</label>
+        <input type="date" name="start_date" id="start_date" value="{{ request.GET.start_date }}" />
+        <button type="button" class="clear-btn" onclick="document.getElementById('start_date').value = '';" aria-label="Clear start date">✕</button>
+      </div>
+
+      <div class="date-group">
+        <label for="end_date">To:</label>
+        <input type="date" name="end_date" id="end_date" value="{{ request.GET.end_date }}" />
+        <button type="button" class="clear-btn" onclick="document.getElementById('end_date').value = '';" aria-label="Clear end date">✕</button>
+      </div>
+      {% endif %}
+      <div class="type-group">
+        <label for="type"></label>
+        {% if page == 'per_host.html' %}
+          <select name="type" id="type" readonly disabled>
+            <option value="{{events.0.type}}">{{events.0.type}}</option>
+          </select>
+        {% else %}
+          <select name="type" id="type">
+            <option value="">All Types</option>
+            <option value="switch" {% if request.GET.type == "switch" %}selected{% endif %}>Switch</option>
+            <option value="mpls" {% if request.GET.type == "mpls" %}selected{% endif %}>MPLS</option>
+            <option value="link down" {% if request.GET.type == "link down" %}selected{% endif %}>Link Down</option>
+            <option value="traffic congestion" {% if request.GET.type == "traffic congestion" %}selected{% endif %}>Traffic Congestion</option>
+            <option value="optical power" {% if request.GET.type == "optical power" %}selected{% endif %}>Optical Power</option>
+            <option value="crc" {% if request.GET.type == "crc" %}selected{% endif %}>CRC</option>
+            <option value="losses/latency" {% if request.GET.type == "losses/latency" %}selected{% endif %}>Losses/Latency</option>
+
+          </select>
+        {% endif %}
+      </div>
+
+      <button type="submit" class="search-btn">Search</button>
+    </form>
+  </div>
+   <div class="sync-button-container">
+    <form method="post" action="{% url 'sync_page' %}" title="Sync data from Google Sheet">
+        {% csrf_token %}
+        <!-- This hidden input tells the view where to redirect back to -->
+        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+        <button type="submit" class="sync-btn">
+            <!-- Using a Font Awesome icon for a nice look -->
+            <i class="fas fa-sync-alt"></i> Sync Data
+        </button>
+    </form>
+
+ </div>
+
+
+{% if messages %}
+    <div class="messages-container" style="position: fixed; top: 80px; right: 20px; z-index: 1050;">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert"
+                 style="padding: 1rem; margin-bottom: 1rem; border: 1px solid transparent; border-radius: .25rem; min-width: 250px; background-color: #d4edda; color: #155724; border-color: #c3e6cb;">
+                {{ message }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close" style="background: none; border: none;">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        {% endfor %}
+    </div>
+    <script>
+        setTimeout(function () {
+            const alerts = document.querySelectorAll('.messages-container .alert');
+            alerts.forEach(function (alert) {
+                alert.style.transition = "opacity 0.5s ease";
+                alert.style.opacity = 0;
+                setTimeout(() => alert.remove(), 500);
+            });
+        }, 3000);
+    </script>
+{% endif %}

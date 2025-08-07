@@ -1,0 +1,39 @@
+
+{% load static%}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Network Event Details</title>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+  <link rel="stylesheet" href="{% static 'styles/style.css'%}">
+  <link rel="icon" type="image/png" href="{% static 'favicon.png' %}">
+  <link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+/>
+ </head>
+<body><header>
+  {% include 'navbar.html' %}
+  </header>
+  <main>
+     <div id="loading-spinner">
+    <div class="spinner"></div>
+  </div>
+   <div class="page-transition">
+  {% block body %}
+
+  {% endblock %}
+    </div>
+   </main>
+
+   <script src="{% static 'js/script.js'%}"></script>
+   <script src="{% static 'js/client-filter.js' %}"></script>
+
+
+
+</body>
+</html>

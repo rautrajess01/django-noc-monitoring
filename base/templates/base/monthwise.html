@@ -1,0 +1,71 @@
+{% extends 'layout.html'%}
+
+{% block body %}
+
+
+<div class="month-selector">
+  {% for month in months %}
+    <a href="?month={{ month }}" data-month-name="{{ month }}" class="month-box">
+      {{ month }}
+    </a>
+  {% endfor %}
+</div>
+
+<div class="month-dates">
+  <h3 id="month-title" style="margin-top: 20px;"></h3>
+  <div class="date-grid" id="date-grid-container">
+    </div>
+</div>
+
+<div>
+  <div class="table-container" style="margin-top: 40px;">
+    <div class="table-wrapper">
+      <h3 id="table-title">All Events</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Host Name</th>
+            <th>Down Time</th>
+            <th>Total Duration</th>
+            <th>Reason</th>
+            <th>Type</th>
+            <th>Remarks</th>
+          </tr>
+        </thead>
+        <tbody id="hostSummaryTable">
+          {% for host in events %}
+          <tr class="host-row" data-month="{{ host.data_month }}" data-day="{{ host.data_day }}">
+            <td>{{ host.date }}</td>
+            <td>{{ host.name }}</td>
+            <td>{{ host.down_time }}</td>
+            <td>{{ host.duration }}</td>
+            <td>{{ host.reason }}</td>
+            <td>{{ host.type }}</td>
+            <td>
+              <button type="button" onclick="openPopup('popup-{{ forloop.counter }}')">Show</button>
+            </td>
+          </tr>
+          {% endfor %}
+          <tr id="no-events-row" style="display: none;">
+            <td colspan="7" style="text-align: center; padding: 20px;">No events found for this selection.</td>
+          </tr>
+                    {% for pending in events %}
+      <div id="popup-{{ forloop.counter }}" class="popup-overlay">
+        <div class="popup">
+          <button class="close-btn" onclick="closePopup('popup-{{ forloop.counter }}')">×</button>
+          <h3>Remark</h3>
+          <p>{{ pending.remarks }}</p>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<script id="nepali-month-data" type="application/json">
+  {{ nepali_month_days_json|safe }}
+</script>
+
+
+{% endblock %}

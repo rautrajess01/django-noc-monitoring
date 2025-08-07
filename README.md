@@ -111,10 +111,4 @@ Then log in at: [http://127.0.0.1:8000/admin](http://127.0.0.1:8000/admin)
 ## 💼 Why This Project?
 
 This app was developed for a real-world use case in a company’s NOC team to monitor and manage network-related events.  
-It demonstrates backend integration, event tracking, and external API usage — making it a great portfolio project for showcasing Django development skills.
-
----
-
-## 📃 License
-
-This codebase is open for educational and portfolio use. Commercial usage is restricted unless permitted.
+It demonstrates backend integration, event tracking, and external API usage.

@@ -13,6 +13,10 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 import os
 from pathlib import Path
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -109,7 +113,7 @@ LANGUAGE_CODE = "en-us"
 USE_I18N = True
 
 USE_TZ = True
-TIME_ZONE = 'Asia/Kathmandu'
+TIME_ZONE = "Asia/Kathmandu"
 
 
 # Static files (CSS, JavaScript, Images)
@@ -122,11 +126,11 @@ STATICFILES_DIRS = [
     ),  # This is where you keep your static files (CSS, JS)
 ]
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media' 
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-GOOGLE_CREDENTIALS_FILE = 'credentials.json'
-GOOGLE_SHEET_KEY = '1n5Z4HIODhasLAnrEMUaAjeyAV0t-_uQR-rP7Jl_K4T4'
+GOOGLE_CREDENTIALS_FILE = os.getenv("GOOGLE_CREDENTIALS_FILE")
+GOOGLE_SHEET_KEY = os.getenv("GOOGLE_SHEET_KEY")
